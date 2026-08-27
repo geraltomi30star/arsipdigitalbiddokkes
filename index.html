@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arsip Digital Biddokkes Polda Sulteng</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute;">
+  <defs>
+    <symbol id="logo-biddokkes" viewBox="0 0 200 224">
+      <clipPath id="shieldClip">
+        <path d="M100 6 L186 30 L186 116 C186 172 144 204 100 220 C56 204 14 172 14 116 L14 30 Z"/>
+      </clipPath>
+      <g clip-path="url(#shieldClip)">
+        <rect x="0" y="0" width="100" height="224" fill="#0C7A3B"/>
+        <rect x="100" y="0" width="100" height="224" fill="#0A0A0A"/>
+      </g>
+      <path d="M100 6 L186 30 L186 116 C186 172 144 204 100 220 C56 204 14 172 14 116 L14 30 Z" fill="none" stroke="#D4AF37" stroke-width="5"/>
+
+      <g fill="#D4AF37">
+        <path d="M70 38 l2.6 6.3 6.8.5 -5.2 4.4 1.6 6.6 -5.8-3.6 -5.8 3.6 1.6-6.6 -5.2-4.4 6.8-.5 Z"/>
+        <path d="M100 24 l3 7.2 7.8.6 -6 5 1.9 7.6 -6.7-4.1 -6.7 4.1 1.9-7.6 -6-5 7.8-.6 Z"/>
+        <path d="M130 38 l2.6 6.3 6.8.5 -5.2 4.4 1.6 6.6 -5.8-3.6 -5.8 3.6 1.6-6.6 -5.2-4.4 6.8-.5 Z"/>
+      </g>
+
+      <g fill="none" stroke="#D4AF37" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="100" y1="66" x2="100" y2="176"/>
+        <path d="M100 78 C72 88 72 108 100 118 C128 128 128 148 100 158"/>
+        <path d="M100 78 C128 88 128 108 100 118 C72 128 72 148 100 158"/>
+      </g>
+      <g fill="#D4AF37" stroke="none">
+        <path d="M100 62 C82 50 58 52 42 42 C56 60 72 66 98 72 Z"/>
+        <path d="M100 62 C118 50 142 52 158 42 C144 60 128 66 102 72 Z"/>
+        <path d="M100 66 C88 58 70 58 58 52 C68 65 80 69 98 74 Z"/>
+        <path d="M100 66 C112 58 130 58 142 52 C132 65 120 69 102 74 Z"/>
+      </g>
+
+      <path id="textArc" d="M32 128 C40 172 72 198 100 202 C128 198 160 172 168 128" fill="none"/>
+      <text font-size="12.5" font-weight="700" letter-spacing="0.5" fill="#D4AF37">
+        <textPath href="#textArc" startOffset="50%" text-anchor="middle">KEDOKTERAN DAN KESEHATAN</textPath>
+      </text>
+    </symbol>
+  </defs>
+</svg>
+
+
+<!-- ===== Splash: logo Biddokkes ===== -->
+<div class="splash-screen" id="splash-screen">
+  <div class="splash-logo">
+    <svg viewBox="0 0 200 224" width="100" height="112"><use href="#logo-biddokkes"></use></svg>
+  </div>
+  <div class="splash-title">ARSIP DIGITAL BIDDOKKES</div>
+  <div class="splash-sub">Polda Sulawesi Tengah</div>
+</div>
+
+<!-- ===== Halaman login (tampilan saja / demo, bukan OAuth sungguhan) ===== -->
+<div class="login-screen" id="login-screen">
+  <div class="login-card">
+    <div class="login-brand">
+      <svg viewBox="0 0 200 224" width="52" height="58"><use href="#logo-biddokkes"></use></svg>
+    </div>
+    <h1>Masuk ke Arsip Digital Biddokkes</h1>
+    <p class="login-sub">Khusus admin pengelola arsip Biddokkes Polda Sulteng.</p>
+
+    <div id="google-signin-container" class="google-signin-container hidden"></div>
+
+    <button class="google-btn" id="google-login-btn" onclick="handleGoogleLogin()">
+      <svg viewBox="0 0 48 48" width="18" height="18">
+        <path fill="#EA4335" d="M24 9.5c3.4 0 6.4 1.2 8.8 3.5l6.5-6.5C35.3 2.6 30 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.6 5.9C12 13 17.5 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.9 7.2l7.5 5.8c4.4-4 6.9-10 6.9-17.5z"/>
+        <path fill="#FBBC05" d="M10.2 19.1a14.5 14.5 0 000 9.8l-7.6 5.9a24 24 0 010-21.6z"/>
+        <path fill="#34A853" d="M24 48c6 0 11.3-2 15.1-5.4l-7.5-5.8c-2.1 1.4-4.7 2.3-7.6 2.3-6.5 0-12-4.5-13.8-10.5l-7.6 5.9C6.5 42.6 14.6 48 24 48z"/>
+      </svg>
+      <span id="google-login-label">Lanjutkan dengan Akun Google</span>
+    </button>
+
+    <div class="login-note" id="login-note">Tampilan ini merupakan simulasi antarmuka masuk — belum terhubung ke sistem autentikasi Google yang sesungguhnya.</div>
+  </div>
+</div>
+
+<!-- ===== Dropdown & panel akun ===== -->
+<div class="account-dropdown" id="account-dropdown">
+  <div class="acc-header">
+    <div class="acc-avatar-lg">BD</div>
+    <div class="acc-name" id="acc-name">Admin Biddokkes</div>
+    <div class="acc-email" id="acc-email">admin.biddokkes@gmail.com</div>
+  </div>
+  <button class="acc-manage-btn" onclick="openAccountModal()">Kelola Akun Google Anda</button>
+  <div class="acc-sep"></div>
+  <div class="acc-item" onclick="handleLogout()">Keluar</div>
+</div>
+
+<div class="overlay" id="account-modal-overlay">
+  <div class="modal account-modal">
+    <div class="account-modal-header">
+      <div class="acc-avatar-xl">BD</div>
+      <h2 id="am-name">Admin Biddokkes</h2>
+      <div class="modal-sub" id="am-email">admin.biddokkes@gmail.com</div>
+    </div>
+    <div class="account-tabs">
+      <div class="acc-tab active" data-tab="info" onclick="setAccountTab('info')">Info pribadi</div>
+      <div class="acc-tab" data-tab="keamanan" onclick="setAccountTab('keamanan')">Keamanan</div>
+      <div class="acc-tab" data-tab="privasi" onclick="setAccountTab('privasi')">Privasi</div>
+    </div>
+    <div class="acc-tab-panel" id="acc-panel-info">
+      <div class="detail-row"><span class="k">Nama</span><span class="v">Admin Biddokkes</span></div>
+      <div class="detail-row"><span class="k">Email</span><span class="v">admin.biddokkes@gmail.com</span></div>
+      <div class="detail-row"><span class="k">Peran</span><span class="v">Administrator arsip</span></div>
+      <div class="detail-row" style="border-bottom:none;"><span class="k">Instansi</span><span class="v">Biddokkes Polda Sulteng</span></div>
+    </div>
+    <div class="acc-tab-panel hidden" id="acc-panel-keamanan">
+      <div class="detail-row"><span class="k">Verifikasi 2 langkah</span><span class="v">Aktif</span></div>
+      <div class="detail-row"><span class="k">Kata sandi terakhir diubah</span><span class="v">-</span></div>
+      <div class="detail-row" style="border-bottom:none;"><span class="k">Perangkat aktif</span><span class="v">1 perangkat</span></div>
+    </div>
+    <div class="acc-tab-panel hidden" id="acc-panel-privasi">
+      <div class="detail-row"><span class="k">Riwayat aktivitas</span><span class="v">Tersimpan lokal</span></div>
+      <div class="detail-row" style="border-bottom:none;"><span class="k">Berbagi data</span><span class="v">Tidak dibagikan ke pihak ketiga</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeAccountModal()">Tutup</button>
+      <button class="btn-danger" onclick="handleLogout()">Keluar dari akun</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Bantuan ===== -->
+<div class="overlay" id="help-overlay">
+  <div class="modal">
+    <h2>Bantuan</h2>
+    <div class="modal-sub">Panduan singkat menggunakan Arsip Digital Biddokkes.</div>
+    <div class="help-item">
+      <h4>Menambah surat</h4>
+      <p>Klik <b>+ Tambah arsip</b> di sidebar, unggah berkas hasil scan (PDF/JPG/PNG), lalu isi nama dan kategorinya. Detail lain bersifat opsional.</p>
+    </div>
+    <div class="help-item">
+      <h4>Sampul surat</h4>
+      <p>Sampul adalah map yang mengelompokkan beberapa surat sejenis, seperti map arsip fisik. Buat lewat menu <b>Sampul surat</b>.</p>
+    </div>
+    <div class="help-item">
+      <h4>Semua arsip &amp; indeks A-Z</h4>
+      <p>Menu <b>Semua arsip</b> menampilkan seluruh surat (termasuk yang ada di dalam sampul), tersusun otomatis menurut abjad judulnya.</p>
+    </div>
+    <div class="help-item">
+      <h4>Status surat</h4>
+      <p><b>Aktif</b> = masih berjalan/digunakan. <b>Diarsipkan</b> = prosesnya sudah tuntas. <b>Selesai</b> = disimpan permanen, tidak lagi dipakai sehari-hari.</p>
+    </div>
+    <div class="help-item">
+      <h4>Mencari arsip</h4>
+      <p>Ketik kata kunci di kotak pencarian atas — mencocokkan judul, nomor dokumen, dan nama personel.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="closeHelp()">Mengerti</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Pengaturan ===== -->
+<div class="overlay" id="settings-overlay">
+  <div class="modal">
+    <h2>Pengaturan</h2>
+    <div class="modal-sub">Kelola data dan lihat informasi aplikasi.</div>
+
+    <div class="settings-section">
+      <h4>Cadangkan &amp; pulihkan data</h4>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Ekspor data</div>
+          <div class="settings-row-desc">Unduh seluruh arsip dan sampul sebagai berkas JSON.</div>
+        </div>
+        <button class="btn-secondary" onclick="exportData()">Ekspor</button>
+      </div>
+      <div class="settings-row">
+        <div>
+          <div class="settings-row-title">Impor data</div>
+          <div class="settings-row-desc">Pulihkan data dari berkas JSON hasil ekspor sebelumnya.</div>
+        </div>
+        <button class="btn-secondary" onclick="document.getElementById('import-input').click()">Impor</button>
+        <input type="file" id="import-input" accept="application/json" style="display:none;" onchange="importData(event)">
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h4>Ringkasan data</h4>
+      <div class="detail-row"><span class="k">Total arsip</span><span class="v" id="set-total-arsip">0</span></div>
+      <div class="detail-row"><span class="k">Total sampul</span><span class="v" id="set-total-sampul">0</span></div>
+      <div class="detail-row" style="border-bottom:none;"><span class="k">Kategori tersedia</span><span class="v" id="set-total-kategori">0 kategori</span></div>
+    </div>
+
+    <div class="settings-section">
+      <h4>Tentang aplikasi</h4>
+      <div class="detail-row"><span class="k">Nama aplikasi</span><span class="v">Arsip Digital Biddokkes Polda Sulteng</span></div>
+      <div class="detail-row"><span class="k">Instansi</span><span class="v">Biddokkes Polda Sulawesi Tengah</span></div>
+      <div class="detail-row" style="border-bottom:none;"><span class="k">Versi</span><span class="v">1.0</span></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-primary" onclick="closeSettings()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<div id="app-root" class="hidden">
+<div class="topbar">
+  <button class="icon-btn mobile-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+    <i class="ti">&#9776;</i>
+  </button>
+  <div class="brand">
+    <div class="badge badge-shield">
+      <svg viewBox="0 0 200 224" width="30" height="34"><use href="#logo-biddokkes"></use></svg>
+    </div>
+    <div>
+      <span>Arsip Biddokkes</span>
+      <small>Polda Sulawesi Tengah</small>
+    </div>
+  </div>
+  <div class="search-wrap">
+    <div class="search-box">
+      <i>&#128269;</i>
+      <input type="text" id="search-input" placeholder="Cari" oninput="renderMain()">
+    </div>
+  </div>
+  <div class="top-actions">
+    <button class="icon-btn" title="Bantuan" onclick="openHelp()">&#63;</button>
+    <button class="icon-btn" title="Pengaturan" onclick="openSettings()">&#9881;</button>
+    <div class="avatar" title="Biddokkes" id="avatar-btn" onclick="toggleAccountDropdown(event)">BD</div>
+  </div>
+</div>
+
+<div class="shell">
+  <div class="sidebar">
+    <button class="btn-new" onclick="openForm()"><span class="plus">+</span> Tambah arsip</button>
+
+
+    <div class="nav-item active" data-view="dashboard" onclick="setView('dashboard')">
+      <span class="ic">&#128202;</span><span>Dasbor</span>
+    </div>
+    <div class="nav-item" data-view="all" onclick="setView('all')">
+      <span class="ic">&#128193;</span><span>Semua arsip</span><span class="count" id="count-all">0</span>
+    </div>
+    <div class="nav-item" data-view="sampul-list" onclick="setView('sampul-list')">
+      <span class="ic">&#128194;</span><span>Sampul surat</span><span class="count" id="count-sampul">0</span>
+    </div>
+
+    <div class="nav-sep"></div>
+    <div id="cat-nav"></div>
+
+    <div class="storage-box">
+      <div>Total dokumen tersimpan</div>
+      <div class="storage-bar"><div class="storage-bar-fill" id="storage-fill" style="width:0%"></div></div>
+      <div id="storage-text">0 dokumen</div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="breadcrumb" id="breadcrumb">Dasbor</div>
+    <div class="sub-line" id="sub-line">Ikhtisar arsip kesehatan dan administrasi Biddokkes</div>
+
+    <div id="dashboard-stats" class="stats"></div>
+
+    <div class="toolbar" id="toolbar">
+      <div class="filter-group">
+        <select id="status-filter" onchange="renderMain()">
+          <option value="">Semua status</option>
+          <option value="aktif">Aktif</option>
+          <option value="selesai">Diarsipkan</option>
+          <option value="arsip">Selesai</option>
+        </select>
+        <select id="arah-filter" onchange="renderMain()">
+          <option value="">Semua arah</option>
+          <option value="masuk">Surat Masuk</option>
+          <option value="keluar">Surat Keluar</option>
+        </select>
+        <select id="sort-by" onchange="renderMain()">
+          <option value="baru">Terakhir ditambahkan</option>
+          <option value="nama">Nama (A-Z)</option>
+          <option value="tanggal">Tanggal dokumen</option>
+        </select>
+        <select id="alpha-sort" class="hidden" onchange="renderMain()">
+          <option value="asc">Urutan A-Z</option>
+          <option value="desc">Urutan Z-A</option>
+        </select>
+      </div>
+      <div class="view-toggle" id="view-toggle-wrap">
+        <button id="view-list-btn" class="active" onclick="setDisplayMode('list')" aria-label="Tampilan daftar">&#9776;</button>
+        <button id="view-grid-btn" onclick="setDisplayMode('grid')" aria-label="Tampilan kisi">&#9638;</button>
+      </div>
+    </div>
+
+    <div id="main-content"></div>
+  </div>
+</div>
+
+<div class="overlay" id="form-overlay">
+  <div class="modal">
+    <h2 id="form-title">Tambah surat</h2>
+    <div class="modal-sub" id="form-sub">Unggah berkas hasil scan (PDF/JPG/PNG), lalu lengkapi nama, kategori, nomor, tanggal, dan status dokumennya.</div>
+    <input type="hidden" id="f-id">
+
+    <div class="field" id="upload-field">
+      <label>Berkas hasil scan</label>
+      <label class="dropzone" id="dropzone" for="f-file">
+        <span id="dropzone-icon">&#128196;</span>
+        <span id="dropzone-text">Klik untuk pilih berkas, atau seret ke sini (PDF/JPG/PNG)</span>
+      </label>
+      <input type="file" id="f-file" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="handleFileSelect(event)">
+      <div class="file-chip hidden" id="file-chip">
+        <span id="file-chip-name"></span>
+        <span class="file-chip-remove" onclick="removeSelectedFile()">Hapus</span>
+      </div>
+      <div class="field-note" id="upload-note"></div>
+    </div>
+
+    <div class="field">
+      <label>Nama surat</label>
+      <input type="text" id="f-judul" placeholder="Terisi otomatis dari nama berkas, bisa diubah">
+    </div>
+    <div class="field">
+      <label>Kategori</label>
+      <select id="f-kategori" onchange="onFormKategoriChange()"></select>
+    </div>
+    <div class="field" id="arah-field">
+      <label>Arah surat</label>
+      <select id="f-arah">
+        <option value="">Pilih arah surat</option>
+        <option value="masuk">Surat Masuk</option>
+        <option value="keluar">Surat Keluar</option>
+      </select>
+    </div>
+    <div class="row-2">
+      <div class="field">
+        <label>Nomor dokumen</label>
+        <input type="text" id="f-nomor" placeholder="B/123/VII/2026/Biddokkes">
+      </div>
+      <div class="field">
+        <label>Tanggal dokumen</label>
+        <input type="date" id="f-tanggal">
+      </div>
+    </div>
+    <div class="field hidden" id="tenggat-field">
+      <label>Berlaku sampai / Tenggat</label>
+      <input type="date" id="f-tenggat">
+      <div class="field-note">Setelah tanggal ini terlewati, status "Aktif" otomatis berubah jadi "Selesai" saat aplikasi dibuka.</div>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <select id="f-status"></select>
+      <div class="field-note" id="f-status-note">Terisi otomatis berdasarkan kategori, bisa diubah manual bila perlu.</div>
+    </div>
+    <div class="field">
+      <label>Nama personel / pasien <span class="label-optional">(Opsional)</span></label>
+      <input type="text" id="f-personel" placeholder="Nama, NRP, atau satuan">
+    </div>
+    <div class="field">
+      <label>Keterangan <span class="label-optional">(Opsional)</span></label>
+      <textarea id="f-keterangan" placeholder="Catatan tambahan tentang dokumen ini"></textarea>
+    </div>
+
+    <div class="detail-toggle hidden" id="detail-toggle" onclick="toggleFormDetail()">
+      <span id="detail-toggle-label">+ Detail tambahan (opsional)</span>
+    </div>
+    <div class="detail-extra hidden" id="detail-extra">
+      <div class="field">
+        <label>Sampul (map arsip)</label>
+        <select id="f-sampul"></select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-danger hidden" id="btn-delete" onclick="deleteRecord()">Hapus</button>
+      <button class="btn-secondary" onclick="closeForm()">Batal</button>
+      <button class="btn-primary" onclick="saveRecord()">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="detail-overlay">
+  <div class="modal">
+    <span class="pill" id="d-status" style="margin-bottom:10px;"></span>
+    <h2 id="d-judul"></h2>
+    <div class="modal-sub" id="d-nomor"></div>
+    <div class="file-chip hidden" id="d-file-chip">
+      <span id="d-file-name"></span>
+      <span class="file-chip-open" onclick="viewAttachedFile(detailId)">Lihat berkas</span>
+    </div>
+    <div style="margin-top:14px;">
+      <div class="detail-row"><span class="k">Kategori</span><span class="v" id="d-kategori"></span></div>
+      <div class="detail-row hidden" id="d-arah-row"><span class="k">Arah surat</span><span class="v" id="d-arah"></span></div>
+      <div class="detail-row"><span class="k">Tanggal dokumen</span><span class="v" id="d-tanggal"></span></div>
+      <div class="detail-row hidden" id="d-tenggat-row"><span class="k">Berlaku sampai</span><span class="v" id="d-tenggat"></span></div>
+      <div class="detail-row"><span class="k">Personel / pasien</span><span class="v" id="d-personel"></span></div>
+      <div class="detail-row"><span class="k">Sampul</span><span class="v" id="d-sampul"></span></div>
+      <div class="detail-row" style="border-bottom:none;"><span class="k">Keterangan</span><span class="v" id="d-keterangan"></span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeDetail()">Tutup</button>
+      <button class="btn-primary" id="d-edit-btn">Edit arsip</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="sampul-form-overlay">
+  <div class="modal">
+    <h2 id="sampul-form-title">Tambah sampul baru</h2>
+    <div class="modal-sub">Sampul adalah map/berkas yang membungkus beberapa surat sejenis, seperti map arsip fisik.</div>
+    <input type="hidden" id="s-id">
+    <div class="field">
+      <label>Nama sampul</label>
+      <input type="text" id="s-nama" placeholder="Contoh: Nota Dinas Satuan Brimob 2026">
+    </div>
+    <div class="field">
+      <label>Kategori terkait (opsional)</label>
+      <select id="s-kategori"><option value="">Tidak terikat kategori</option></select>
+    </div>
+    <div class="field">
+      <label>Deskripsi (opsional)</label>
+      <textarea id="s-deskripsi" placeholder="Isi ringkas sampul ini"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-danger hidden" id="s-btn-delete" onclick="deleteSampul()">Hapus</button>
+      <button class="btn-secondary" onclick="closeSampulForm()">Batal</button>
+      <button class="btn-primary" onclick="saveSampul()">Simpan sampul</button>
+    </div>
+  </div>
+</div>
+</div><!-- /app-root -->
+
+<div class="context-menu" id="context-menu">
+  <div class="ctx-item" id="ctx-open">Buka detail</div>
+  <div class="ctx-item" id="ctx-edit">Edit arsip</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item ctx-danger" id="ctx-delete">Hapus</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://accounts.google.com/gsi/client"></script>
+<script src="script.js"></script>
+</body>
+</html>
