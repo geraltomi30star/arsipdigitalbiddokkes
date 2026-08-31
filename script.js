@@ -119,6 +119,67 @@ function getStorage(){
 // penyimpanan browser. STANDALONE menandai kondisi tersebut.
 const STANDALONE = !(typeof window !== 'undefined' && window.storage && typeof window.storage.get === 'function');
 
+// ===== Firebase (opsional): penyimpanan data & berkas di cloud =====
+// Supaya arsip dan berkas hasil scan bisa diakses dari perangkat manapun
+// (bukan cuma tersimpan di satu browser/komputer), isi konfigurasi Firebase
+// Anda di bawah ini. Dapatkan dari Firebase Console:
+// console.firebase.google.com > Project settings > General > "Your apps" >
+// Web app > SDK setup and configuration > Config. Lihat README.md untuk
+// panduan lengkap langkah demi langkah.
+const FIREBASE_CONFIG = {
+  apiKey: 'GANTI_DENGAN_API_KEY_ANDA',
+  authDomain: 'GANTI.firebaseapp.com',
+  projectId: 'GANTI_PROJECT_ID',
+  storageBucket: 'GANTI.appspot.com',
+  messagingSenderId: 'GANTI_SENDER_ID',
+  appId: 'GANTI_APP_ID'
+};
+const FIREBASE_CONFIGURED = FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.startsWith('GANTI');
+
+let fbApp = null;
+let db = null;
+let fbStorage = null;
+let unsubscribeRecords = null;
+let unsubscribeSampul = null;
+
+function useFirebase(){
+  return FIREBASE_CONFIGURED && !!db;
+}
+
+function initFirebase(){
+  if(!FIREBASE_CONFIGURED || typeof firebase === 'undefined') return;
+  try{
+    fbApp = firebase.initializeApp(FIREBASE_CONFIG);
+    db = firebase.firestore();
+    fbStorage = firebase.storage();
+  }catch(e){
+    console.error('Gagal menyiapkan Firebase:', e);
+  }
+}
+
+// Memasang pendengar real-time: begitu ada perubahan data di Firestore
+// (dari perangkat manapun), tampilan di perangkat ini otomatis diperbarui.
+function subscribeToFirestore(){
+  if(!useFirebase()) return;
+  unsubscribeRecords = db.collection('arsip_records').onSnapshot(snap=>{
+    records = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    buildCatNav();
+    refreshCounters();
+    renderMain();
+  }, err=>{
+    showToast('Gagal menyinkron arsip dari cloud: ' + err.message);
+  });
+  unsubscribeSampul = db.collection('arsip_sampul').onSnapshot(snap=>{
+    sampulList = snap.docs.map(d=>({ id:d.id, ...d.data() }));
+    refreshCounters();
+    renderMain();
+  }, err=>{
+    showToast('Gagal menyinkron sampul dari cloud: ' + err.message);
+  });
+}
+
+initFirebase();
+
 const FILE_DB_NAME = 'biddokkes-arsip-files-db';
 const FILE_STORE = 'files';
 let filesDbPromise = null;
@@ -133,31 +194,77 @@ function openFilesDB(){
   });
   return filesDbPromise;
 }
-async function saveFileBlob(id, file){
-  const db = await openFilesDB();
-  if(!db) return false;
+async function saveFileBlobLocal(id, file){
+  const filesDb = await openFilesDB();
+  if(!filesDb) return false;
   return new Promise(resolve=>{
-    const tx = db.transaction(FILE_STORE, 'readwrite');
+    const tx = filesDb.transaction(FILE_STORE, 'readwrite');
     tx.objectStore(FILE_STORE).put({blob:file, name:file.name, type:file.type, size:file.size}, id);
     tx.oncomplete = ()=>resolve(true);
     tx.onerror = ()=>resolve(false);
   });
 }
-async function getFileBlob(id){
-  const db = await openFilesDB();
-  if(!db) return null;
+async function getFileBlobLocal(id){
+  const filesDb = await openFilesDB();
+  if(!filesDb) return null;
   return new Promise(resolve=>{
-    const tx = db.transaction(FILE_STORE, 'readonly');
+    const tx = filesDb.transaction(FILE_STORE, 'readonly');
     const req = tx.objectStore(FILE_STORE).get(id);
     req.onsuccess = ()=> resolve(req.result || null);
     req.onerror = ()=> resolve(null);
   });
 }
-async function deleteFileBlob(id){
-  const db = await openFilesDB();
-  if(!db) return;
-  const tx = db.transaction(FILE_STORE, 'readwrite');
+async function deleteFileBlobLocal(id){
+  const filesDb = await openFilesDB();
+  if(!filesDb) return;
+  const tx = filesDb.transaction(FILE_STORE, 'readwrite');
   tx.objectStore(FILE_STORE).delete(id);
+}
+
+// ===== Simpan/ambil/hapus berkas: pakai Firebase Storage kalau terkonfigurasi
+// (bisa diakses dari perangkat manapun), atau IndexedDB lokal sebagai cadangan.
+function fileStoragePath(id, fileName){
+  return 'arsip-files/' + id + '/' + fileName;
+}
+async function saveFileBlob(id, file){
+  if(useFirebase()){
+    try{
+      await fbStorage.ref().child(fileStoragePath(id, file.name)).put(file);
+      return true;
+    }catch(e){
+      showToast('Gagal mengunggah berkas ke cloud: ' + e.message);
+      return false;
+    }
+  }
+  if(STANDALONE) return saveFileBlobLocal(id, file);
+  return false;
+}
+async function getFileUrl(id){
+  const rec = records.find(r=>r.id===id);
+  if(useFirebase()){
+    if(!rec || !rec.fileName) return null;
+    try{
+      return await fbStorage.ref().child(fileStoragePath(id, rec.fileName)).getDownloadURL();
+    }catch(e){
+      return null;
+    }
+  }
+  if(STANDALONE){
+    const stored = await getFileBlobLocal(id);
+    if(!stored || !stored.blob) return null;
+    return URL.createObjectURL(stored.blob);
+  }
+  return null;
+}
+async function removeStoredFile(record){
+  if(!record) return;
+  if(useFirebase() && record.fileName){
+    try{
+      await fbStorage.ref().child(fileStoragePath(record.id, record.fileName)).delete();
+    }catch(e){ /* berkas mungkin sudah tidak ada, abaikan */ }
+  }else if(STANDALONE){
+    await deleteFileBlobLocal(record.id);
+  }
 }
 function formatFileSize(bytes){
   if(!bytes) return '';
@@ -239,7 +346,18 @@ function setActiveNav(){
   else if(currentView==='all') document.querySelector('[data-view="all"]').classList.add('active');
   else if(currentView==='sampul-list' || currentView==='sampul-detail') document.querySelector('[data-view="sampul-list"]').classList.add('active');
   else if(currentView==='cat'){const n=document.querySelector('[data-view="cat-'+currentCategory+'"]'); if(n) n.classList.add('active');}
-  if(window.innerWidth<=760) document.querySelector('.sidebar').classList.remove('open');
+  if(window.innerWidth<=760) closeMobileSidebar();
+}
+
+function toggleMobileSidebar(evt){
+  if(evt) evt.stopPropagation();
+  const sidebar = document.querySelector('.sidebar');
+  const isOpen = sidebar.classList.toggle('open');
+  document.getElementById('sidebar-backdrop').classList.toggle('show', isOpen);
+}
+function closeMobileSidebar(){
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sidebar-backdrop').classList.remove('show');
 }
 
 function setView(view, cat){
@@ -600,16 +718,23 @@ function openForm(record){
   document.getElementById('f-file').value = '';
   document.getElementById('file-chip').classList.add('hidden');
 
-  if(STANDALONE){
+  if(useFirebase()){
     document.getElementById('form-sub').textContent = 'Unggah berkas hasil scan (PDF/JPG/PNG), lalu lengkapi nama, kategori, nomor, tanggal, dan status dokumennya.';
     document.getElementById('dropzone').classList.remove('hidden');
-    document.getElementById('upload-note').textContent = record && record.hasFile ? '' : 'Berkas tersimpan di penyimpanan browser komputer ini (IndexedDB).';
+    document.getElementById('upload-note').textContent = record && record.hasFile ? '' : 'Berkas tersimpan di cloud (Firebase Storage) — bisa diakses dari perangkat manapun.';
+    if(record && record.hasFile){
+      showFileChip(record.fileName, record.fileSize);
+    }
+  }else if(STANDALONE){
+    document.getElementById('form-sub').textContent = 'Unggah berkas hasil scan (PDF/JPG/PNG), lalu lengkapi nama, kategori, nomor, tanggal, dan status dokumennya.';
+    document.getElementById('dropzone').classList.remove('hidden');
+    document.getElementById('upload-note').textContent = record && record.hasFile ? '' : 'Berkas tersimpan di penyimpanan browser komputer ini (IndexedDB), belum tersambung ke cloud.';
     if(record && record.hasFile){
       showFileChip(record.fileName, record.fileSize);
     }
   }else{
-    // Berjalan sebagai artifact Claude: penyimpanan berkas tidak didukung.
-    document.getElementById('form-sub').textContent = 'Lengkapi nama, kategori, nomor, tanggal, dan status surat. Unggah berkas hanya tersedia saat aplikasi dijalankan mandiri (mis. di Laragon).';
+    // Berjalan sebagai artifact Claude tanpa Firebase: penyimpanan berkas tidak didukung.
+    document.getElementById('form-sub').textContent = 'Lengkapi nama, kategori, nomor, tanggal, dan status surat. Unggah berkas hanya tersedia saat aplikasi dijalankan mandiri (mis. di Laragon) atau setelah Firebase diaktifkan.';
     document.getElementById('dropzone').classList.add('hidden');
     document.getElementById('upload-note').textContent = '';
   }
@@ -729,9 +854,8 @@ if(dropzoneEl){
 }
 
 async function viewAttachedFile(id){
-  const rec = await getFileBlob(id);
-  if(!rec || !rec.blob){ showToast('Berkas tidak ditemukan.'); return; }
-  const url = URL.createObjectURL(rec.blob);
+  const url = await getFileUrl(id);
+  if(!url){ showToast('Berkas tidak ditemukan.'); return; }
   window.open(url, '_blank');
 }
 
@@ -758,12 +882,24 @@ async function saveRecord(){
     fileSize: pendingFile ? pendingFile.size : (existing ? existing.fileSize : null),
     dibuatPada: existing ? existing.dibuatPada : Date.now()
   };
-  if(pendingFile && STANDALONE){
-    await saveFileBlob(id, pendingFile);
+  if(pendingFile && (useFirebase() || STANDALONE)){
+    const ok = await saveFileBlob(id, pendingFile);
+    if(!ok) showToast('Peringatan: berkas gagal diunggah, tapi data surat tetap disimpan.');
   }
-  if(editingId) records = records.map(r=> r.id===editingId ? data : r);
-  else records.push(data);
-  await persist();
+
+  if(useFirebase()){
+    try{
+      const { id: _drop, ...dataWithoutId } = data;
+      await db.collection('arsip_records').doc(id).set(dataWithoutId);
+    }catch(e){
+      showToast('Gagal menyimpan ke cloud: ' + e.message);
+      return;
+    }
+  }else{
+    if(editingId) records = records.map(r=> r.id===editingId ? data : r);
+    else records.push(data);
+    await persist();
+  }
   buildCatNav();
   refreshCounters();
   closeForm();
@@ -774,9 +910,19 @@ async function saveRecord(){
 async function deleteRecord(){
   if(!editingId) return;
   if(!confirm('Hapus dokumen arsip ini? Tindakan tidak dapat dibatalkan.')) return;
-  await deleteFileBlob(editingId);
-  records = records.filter(r=>r.id!==editingId);
-  await persist();
+  const record = records.find(r=>r.id===editingId);
+  await removeStoredFile(record);
+  if(useFirebase()){
+    try{
+      await db.collection('arsip_records').doc(editingId).delete();
+    }catch(e){
+      showToast('Gagal menghapus arsip di cloud: ' + e.message);
+      return;
+    }
+  }else{
+    records = records.filter(r=>r.id!==editingId);
+    await persist();
+  }
   buildCatNav();
   refreshCounters();
   closeForm();
@@ -855,9 +1001,19 @@ document.getElementById('ctx-delete').addEventListener('click', async ()=>{
   hideContextMenu();
   if(!id) return;
   if(!confirm('Hapus dokumen arsip ini? Tindakan tidak dapat dibatalkan.')) return;
-  await deleteFileBlob(id);
-  records = records.filter(r=>r.id!==id);
-  await persist();
+  const record = records.find(r=>r.id===id);
+  await removeStoredFile(record);
+  if(useFirebase()){
+    try{
+      await db.collection('arsip_records').doc(id).delete();
+    }catch(e){
+      showToast('Gagal menghapus arsip di cloud: ' + e.message);
+      return;
+    }
+  }else{
+    records = records.filter(r=>r.id!==id);
+    await persist();
+  }
   buildCatNav();
   refreshCounters();
   showToast('Arsip dihapus.');
@@ -879,16 +1035,27 @@ function closeSampulForm(){ document.getElementById('sampul-form-overlay').class
 async function saveSampul(){
   const nama = document.getElementById('s-nama').value.trim();
   if(!nama){ showToast('Nama sampul wajib diisi.'); return; }
+  const id = editingSampulId || ('sampul-' + Date.now() + '-' + Math.floor(Math.random()*1000));
   const data = {
-    id: editingSampulId || ('sampul-' + Date.now() + '-' + Math.floor(Math.random()*1000)),
+    id,
     nama,
     kategori: document.getElementById('s-kategori').value || null,
     deskripsi: document.getElementById('s-deskripsi').value.trim(),
     dibuatPada: editingSampulId ? (sampulList.find(s=>s.id===editingSampulId)?.dibuatPada || Date.now()) : Date.now()
   };
-  if(editingSampulId) sampulList = sampulList.map(s=> s.id===editingSampulId ? data : s);
-  else sampulList.push(data);
-  await persistSampul();
+  if(useFirebase()){
+    try{
+      const { id: _drop, ...dataWithoutId } = data;
+      await db.collection('arsip_sampul').doc(id).set(dataWithoutId);
+    }catch(e){
+      showToast('Gagal menyimpan sampul ke cloud: ' + e.message);
+      return;
+    }
+  }else{
+    if(editingSampulId) sampulList = sampulList.map(s=> s.id===editingSampulId ? data : s);
+    else sampulList.push(data);
+    await persistSampul();
+  }
   refreshCounters();
   closeSampulForm();
   showToast(editingSampulId ? 'Sampul diperbarui.' : 'Sampul baru ditambahkan.');
@@ -898,10 +1065,21 @@ async function saveSampul(){
 async function deleteSampul(){
   if(!editingSampulId) return;
   if(!confirm('Hapus sampul ini? Surat di dalamnya tidak ikut terhapus, hanya menjadi tanpa sampul.')) return;
-  sampulList = sampulList.filter(s=>s.id!==editingSampulId);
-  records = records.map(r=> r.sampulId===editingSampulId ? {...r, sampulId:null} : r);
-  await persistSampul();
-  await persist();
+  const affected = records.filter(r=>r.sampulId===editingSampulId);
+  if(useFirebase()){
+    try{
+      await db.collection('arsip_sampul').doc(editingSampulId).delete();
+      await Promise.all(affected.map(r=> db.collection('arsip_records').doc(r.id).update({sampulId:null})));
+    }catch(e){
+      showToast('Gagal menghapus sampul di cloud: ' + e.message);
+      return;
+    }
+  }else{
+    sampulList = sampulList.filter(s=>s.id!==editingSampulId);
+    records = records.map(r=> r.sampulId===editingSampulId ? {...r, sampulId:null} : r);
+    await persistSampul();
+    await persist();
+  }
   refreshCounters();
   closeSampulForm();
   showToast('Sampul dihapus.');
@@ -915,10 +1093,15 @@ document.getElementById('detail-overlay').addEventListener('click', e=>{ if(e.ta
 
 async function init(){
   buildFormCategorySelect();
-  await loadRecords();
-  await loadSampul();
-  await checkExpiredRecords();
-  await backfillMissingArah();
+  if(useFirebase()){
+    // Data arsip & sampul dimuat otomatis secara real-time lewat
+    // subscribeToFirestore() (dipanggil setelah login berhasil).
+  }else{
+    await loadRecords();
+    await loadSampul();
+    await checkExpiredRecords();
+    await backfillMissingArah();
+  }
   buildCatNav();
   refreshCounters();
   setView('dashboard');
@@ -964,7 +1147,7 @@ async function checkExpiredRecords(){
 // client ID (Web application), lalu daftarkan alamat aplikasi Anda
 // (mis. http://biddokkes-arsip.test atau http://localhost) di
 // "Authorized JavaScript origins". Lihat README.md untuk panduan lengkap.
-const GOOGLE_CLIENT_ID = 'GANTI_DENGAN_CLIENT_ID_ANDA.apps.googleusercontent.com';
+const GOOGLE_CLIENT_ID = '393565332529-a3u8k8a7mg671jb1a2fppgclouf8mut8.apps.googleusercontent.com';
 let currentUser = null;
 
 function decodeJwt(token){
@@ -1001,7 +1184,7 @@ function initGoogleSignIn(){
   }
 }
 
-function handleGoogleCredentialResponse(response){
+async function handleGoogleCredentialResponse(response){
   const payload = decodeJwt(response.credential);
   if(payload){
     currentUser = {
@@ -1010,6 +1193,15 @@ function handleGoogleCredentialResponse(response){
       picture: payload.picture || ''
     };
     applyCurrentUserToUI();
+  }
+  if(useFirebase()){
+    try{
+      const cred = firebase.auth.GoogleAuthProvider.credential(response.credential);
+      await firebase.auth().signInWithCredential(cred);
+      subscribeToFirestore();
+    }catch(e){
+      showToast('Gagal masuk ke penyimpanan cloud: ' + e.message);
+    }
   }
   proceedToApp();
 }
@@ -1070,6 +1262,11 @@ function handleLogout(){
   document.getElementById('login-screen').classList.add('show');
   if(typeof google !== 'undefined' && google.accounts && google.accounts.id){
     google.accounts.id.disableAutoSelect();
+  }
+  if(unsubscribeRecords){ unsubscribeRecords(); unsubscribeRecords = null; }
+  if(unsubscribeSampul){ unsubscribeSampul(); unsubscribeSampul = null; }
+  if(useFirebase() && firebase.auth().currentUser){
+    firebase.auth().signOut().catch(()=>{});
   }
 }
 
