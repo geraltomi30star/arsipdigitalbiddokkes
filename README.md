@@ -19,6 +19,8 @@ tetap berada dalam satu folder yang sama agar tautannya tetap berfungsi.
 
 ## Cara menjalankan secara lokal
 
+
+
 Karena ini murni HTML/CSS/JS (tanpa proses build), cukup buka `index.html`
 langsung di browser, atau jalankan server statis sederhana, misalnya:
 
