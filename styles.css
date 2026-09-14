@@ -311,6 +311,10 @@
   }
   .google-btn:hover{background:#F8F9FA;box-shadow:0 1px 3px rgba(0,0,0,0.12);}
   .login-note{font-size:11px;color:var(--ink-faint);margin-top:18px;line-height:1.5;}
+  .login-error{
+    background:#FDECEA;border:1px solid #F5C6C0;color:#B3261E;border-radius:8px;
+    padding:10px 12px;font-size:12.5px;margin-bottom:14px;text-align:left;line-height:1.5;
+  }
 
   /* ===== Account dropdown & modal ===== */
   .account-dropdown{

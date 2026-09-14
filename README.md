@@ -19,9 +19,7 @@ tetap berada dalam satu folder yang sama agar tautannya tetap berfungsi.
 
 ## Cara menjalankan secara lokal
 
-
-
-Karena ini murni HTML/CSS/JS (tanpa proses build), cukup buka `index.html`
+Karena ini murni HTML/CSS/JS (tanpa proses build), cukup buka  `index.html`
 langsung di browser, atau jalankan server statis sederhana, misalnya:
 
 ```bash
@@ -77,43 +75,6 @@ Biddokkes, sebaiknya diganti ke penyimpanan terpusat**, misalnya:
   dari nol.
 
 Beri tahu jika ingin dibantu menyambungkan ke salah satu opsi di atas.
-
-## Halaman pembuka & login
-
-Saat aplikasi dibuka, tampil animasi logo Biddokkes yang kemudian beralih ke
-halaman **"Masuk ke Arsip Digital Biddokkes"**. Login memakai **Google
-Identity Services** — jadi ini login Google sungguhan (bukan simulasi),
-tapi butuh Anda mendaftarkan aplikasi ini ke Google Cloud Console dulu agar
-tombolnya aktif:
-
-1. Buka [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials).
-2. Buat project (kalau belum ada), lalu klik **Create Credentials → OAuth
-   client ID**.
-3. Pilih tipe **Web application**.
-4. Di bagian **Authorized JavaScript origins**, tambahkan alamat tempat
-   aplikasi ini dijalankan, misalnya:
-   - `http://localhost` (kalau diakses lewat `http://localhost/biddokkes-arsip/`)
-   - `http://biddokkes-arsip.test` (kalau memakai Auto Virtual Host Laragon)
-5. Setelah dibuat, salin **Client ID** yang muncul (bentuknya
-   `xxxxx.apps.googleusercontent.com`).
-6. Buka `script.js`, cari baris berikut di dekat bagian atas:
-   ```js
-   const GOOGLE_CLIENT_ID = 'GANTI_DENGAN_CLIENT_ID_ANDA.apps.googleusercontent.com';
-   ```
-   Ganti dengan Client ID Anda, simpan.
-7. Muat ulang halaman — tombol Google asli ("Continue with Google") akan
-   otomatis muncul dan admin bisa masuk memakai akun Google sungguhan
-   (nama, email, dan foto profil akan tampil di pojok kanan atas).
-
-Selama Client ID belum diisi, aplikasi otomatis menampilkan tombol cadangan
-bergaya Google (murni tampilan, tanpa verifikasi identitas nyata) supaya
-Anda tetap bisa mencoba aplikasinya.
-
-Catatan keamanan: verifikasi yang dilakukan saat ini murni di sisi browser
-(client-side). Untuk keamanan tingkat produksi (memastikan token benar-benar
-sah dan membatasi siapa saja yang boleh masuk), sebaiknya token yang
-dihasilkan Google diverifikasi ulang di backend sebelum akses diberikan.
-Beri tahu kalau ingin dibantu menyiapkan verifikasi backend tersebut.
 
 ## Unggah berkas hasil scan
 

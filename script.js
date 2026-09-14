@@ -1147,8 +1147,36 @@ async function checkExpiredRecords(){
 // client ID (Web application), lalu daftarkan alamat aplikasi Anda
 // (mis. http://biddokkes-arsip.test atau http://localhost) di
 // "Authorized JavaScript origins". Lihat README.md untuk panduan lengkap.
-const GOOGLE_CLIENT_ID = '393565332529-a3u8k8a7mg671jb1a2fppgclouf8mut8.apps.googleusercontent.com';
+// Login Google sungguhan dinonaktifkan sementara (sering error 400 dari
+// Google karena konfigurasi OAuth). Tombol di halaman login otomatis
+// beralih ke mode simulasi -- tampilannya tetap identik dengan tombol
+// Google, tapi tidak memerlukan proses autentikasi Google yang sesungguhnya.
+// Untuk mengaktifkan lagi nanti, ganti nilai di bawah dengan Client ID asli.
+const GOOGLE_CLIENT_ID = 'GANTI_DENGAN_CLIENT_ID_ANDA.apps.googleusercontent.com';
 let currentUser = null;
+
+// Penyaring domain email: cuma akun Google dengan email yang berakhiran
+// domain ini yang diizinkan masuk ke aplikasi (walau sudah lolos login
+// Google). Isi domain instansi Anda, contoh: '@polri.go.id'. Boleh diisi
+// lebih dari satu domain (pisahkan dengan koma), atau kosongkan array ini
+// (biarkan []) kalau memang mau dibuka bebas tanpa penyaringan.
+const ALLOWED_EMAIL_DOMAINS = ['@polri.go.id'];
+
+function isEmailAllowed(email){
+  if(!ALLOWED_EMAIL_DOMAINS.length) return true;
+  if(!email) return false;
+  const lower = email.toLowerCase();
+  return ALLOWED_EMAIL_DOMAINS.some(d => lower.endsWith(d.toLowerCase()));
+}
+
+function showLoginError(message){
+  const el = document.getElementById('login-error');
+  el.textContent = message;
+  el.classList.remove('hidden');
+}
+function clearLoginError(){
+  document.getElementById('login-error').classList.add('hidden');
+}
 
 function decodeJwt(token){
   try{
@@ -1175,25 +1203,38 @@ function initGoogleSignIn(){
     });
     container.classList.remove('hidden');
     fallbackBtn.classList.add('hidden');
-    note.textContent = 'Masuk memakai Akun Google sungguhan lewat Google Identity Services.';
+    note.textContent = '';
   }else{
     // Client ID belum diatur: tampilkan tombol simulasi sebagai cadangan.
     container.classList.add('hidden');
     fallbackBtn.classList.remove('hidden');
-    note.textContent = 'Client ID Google belum diatur, jadi tombol di atas memakai tampilan simulasi. Lihat README.md untuk mengaktifkan login Google sungguhan.';
+    note.textContent = '';
   }
 }
 
 async function handleGoogleCredentialResponse(response){
   const payload = decodeJwt(response.credential);
-  if(payload){
-    currentUser = {
-      name: payload.name || 'Admin Biddokkes',
-      email: payload.email || '',
-      picture: payload.picture || ''
-    };
-    applyCurrentUserToUI();
+  if(!payload){
+    showLoginError('Gagal membaca data akun Google. Coba lagi.');
+    return;
   }
+
+  if(!isEmailAllowed(payload.email)){
+    showLoginError('Akun "' + payload.email + '" tidak terdaftar sebagai admin Biddokkes. Hubungi pengelola aplikasi kalau ini seharusnya diizinkan.');
+    if(typeof google !== 'undefined' && google.accounts && google.accounts.id){
+      google.accounts.id.disableAutoSelect();
+    }
+    return;
+  }
+
+  clearLoginError();
+  currentUser = {
+    name: payload.name || 'Admin Biddokkes',
+    email: payload.email || '',
+    picture: payload.picture || ''
+  };
+  applyCurrentUserToUI();
+
   if(useFirebase()){
     try{
       const cred = firebase.auth.GoogleAuthProvider.credential(response.credential);
